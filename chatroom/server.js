@@ -15,88 +15,101 @@ app.use(express.json());
 
 // Handle socket.io connections
 io.on("connection", (socket) => {
-    console.log("A user connected");
+  console.log("A user connected");
 
-    // Handle user login
-    socket.on("login", async (data) => {
-        const { username, password } = data;
+  // Handle user login
+  socket.on("login", async (data) => {
+    const { username, password } = data;
 
-        try {
-            // Replace this mock API call with your actual login validation logic
-            const response = await axios.post("http://localhost:5000/login", {
-                username,
-                password,
-            });
+    try {
+      // Replace this mock API call with your actual login validation logic
+      const response = await axios.post("http://localhost:5000/login", {
+        username,
+        password,
+      });
 
-            if (response.data.status === "success") {
-                // Save the logged-in user
-                users[socket.id] = username;
+      if (response.data.status === "success") {
+        // Save the logged-in user
+        users[socket.id] = username;
 
-                // Notify the client of successful login
-                socket.emit("loginSuccess", "Login successful!");
+        // Notify the client of successful login
+        socket.emit("loginSuccess", "Login successful!");
 
-                // Broadcast the updated user list to all clients
-                io.emit("updateUserList", Object.values(users));
-            } else {
-                socket.emit("loginFailure", "Invalid username or password.");
-            }
-        } catch (error) {
-            socket.emit(
-                "loginFailure",
-                error.response?.data?.message || "Login failed due to server error."
-            );
-        }
-    });
-
-    // Handle group messages
-    socket.on("sendGroupMessage", (message) => {
-        const username = users[socket.id];
-        if (username) {
-            io.emit("groupMessage", { from: username, message });
-        }
-    });
-
-    // Handle private messages
-    socket.on("requestPrivateChat", (data) => {
-        const { toUsername, message } = data;
-
-        const fromUsername = users[socket.id];
-
-        // Prevent private messages to self
-        if (toUsername === fromUsername) {
-            socket.emit("privateChatError", "You cannot send a private message to yourself.");
-            return;
-        }
-
-        // Find the recipient's socket ID
-        const toSocketId = Object.keys(users).find((id) => users[id] === toUsername);
-
-        if (toSocketId) {
-            // Send the private message to the recipient
-            io.to(toSocketId).emit("privateChatRequest", {
-                fromUsername,
-                message,
-            });
-        } else {
-            // If the recipient is not found (e.g., logged out)
-            socket.emit("privateChatError", "User not found or not online.");
-        }
-    });
-
-    // Handle user disconnect
-    socket.on("disconnect", () => {
-        // Remove the user from the active users list
-        delete users[socket.id];
-
-        // Notify all clients of the updated user list
+        // Broadcast the updated user list to all clients
         io.emit("updateUserList", Object.values(users));
-        console.log("A user disconnected");
-    });
+      } else {
+        socket.emit("loginFailure", "Invalid username or password.");
+      }
+    } catch (error) {
+      socket.emit(
+        "loginFailure",
+        error.response?.data?.message || "Login failed due to server error."
+      );
+    }
+  });
+
+  // Handle group messages
+  socket.on("sendGroupMessage", (message) => {
+    const username = users[socket.id];
+    if (username) {
+      io.emit("groupMessage", { from: username, message });
+    }
+  });
+
+  // Handle private messages
+  socket.on("requestPrivateChat", (data) => {
+    const { toUsername, message } = data;
+
+    const fromUsername = users[socket.id];
+
+    // Prevent private messages to self
+    if (toUsername === fromUsername) {
+      socket.emit(
+        "privateChatError",
+        "You cannot send a private message to yourself."
+      );
+      return;
+    }
+
+    // Find the recipient's socket ID
+    const toSocketId = Object.keys(users).find(
+      (id) => users[id] === toUsername
+    );
+
+    if (toSocketId) {
+      // Send the private message to the recipient
+      io.to(toSocketId).emit("privateChatRequest", {
+        fromUsername,
+        message,
+      });
+    } else {
+      // If the recipient is not found (e.g., logged out)
+      socket.emit("privateChatError", "User not found or not online.");
+    }
+  });
+
+  // Handle user disconnect
+  socket.on("disconnect", () => {
+    // Remove the user from the active users list
+    delete users[socket.id];
+
+    // Notify all clients of the updated user list
+    io.emit("updateUserList", Object.values(users));
+    console.log("A user disconnected");
+  });
+
+  socket.on("logout", (data) => {
+    const { username } = data;
+    if (users[username]) {
+      delete users[username];
+      io.emit("updateUserList", Object.keys(users)); // Update the user list for everyone
+      console.log(`${username} logged out.`);
+    }
+  });
 });
 
 // Start the server
 const PORT = 3000;
 server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server is running on http://192.168.29.13:${PORT}`);
+  console.log(`Server is running on http://192.168.29.13:${PORT}`);
 });
-

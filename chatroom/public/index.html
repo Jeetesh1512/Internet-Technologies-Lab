@@ -28,17 +28,16 @@
 
         <!-- Chat Area -->
         <div class="w-2/3 flex flex-col bg-gray-50">
-            <div class="flex flex-col h-full">
-                <!-- Group Chat -->
-                <div>
-                    <h3 class="text-lg font-semibold bg-gray-200 p-4">Group Chat</h3>
-                </div>
-                <div id="groupChat" class="flex-grow overflow-y-auto bg-white shadow-inner border rounded-lg p-4 mb-4"></div>
+            <div class="flex justify-between items-center bg-gray-200 p-4">
+                <h3 class="text-lg font-semibold">Group Chat</h3>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Logout</button>
+            </div>
 
-                <div class="flex gap-2 items-center px-4">
-                    <textarea id="groupMessage" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Type a message..."></textarea>
-                    <button onclick="sendGroupMessage()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">Send</button>
-                </div>
+            <div id="groupChat" class="flex-grow overflow-y-auto bg-white shadow-inner border rounded-lg p-4 mb-4"></div>
+
+            <div class="flex gap-2 items-center px-4">
+                <textarea id="groupMessage" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Type a message..."></textarea>
+                <button onclick="sendGroupMessage()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">Send</button>
             </div>
 
             <!-- Private Chat -->
@@ -119,6 +118,18 @@
         socket.on("privateChatError", (message) => {
             alert(message);
         });
+
+        function logout() {
+            if (loggedInUser) {
+                socket.emit("logout", { username: loggedInUser });
+                loggedInUser = null;
+                document.getElementById("chatContainer").classList.add("hidden");
+                document.getElementById("loginContainer").classList.remove("hidden");
+                document.getElementById("username").value = "";
+                document.getElementById("password").value = "";
+                alert("You have been logged out.");
+            }
+        }
     </script>
 </body>
 </html>
