@@ -22,7 +22,6 @@ io.on("connection", (socket) => {
     const { username, password } = data;
 
     try {
-      // Replace this mock API call with your actual login validation logic
       const response = await axios.post("http://localhost:5000/login", {
         username,
         password,
@@ -44,6 +43,33 @@ io.on("connection", (socket) => {
       socket.emit(
         "loginFailure",
         error.response?.data?.message || "Login failed due to server error."
+      );
+    }
+  });
+
+  // Handle user signup
+  socket.on("signup", async (data) => {
+    const { username, password } = data;
+
+    try {
+      const response = await axios.post("http://localhost:5000/signup", {
+        username,
+        password,
+      });
+
+      if (response.data.status === "success") {
+        // Notify the client that signup was successful
+        socket.emit("signupSuccess", "Signup successful! You can now log in.");
+
+        // Optionally, you could log the user in automatically after a successful signup
+        socket.emit("login", { username, password }); // Automatically try to log them in
+      } else {
+        socket.emit("signupFailure", response.data.message || "Signup failed.");
+      }
+    } catch (error) {
+      socket.emit(
+        "signupFailure",
+        error.response?.data?.message || "Signup failed due to server error."
       );
     }
   });
@@ -98,13 +124,17 @@ io.on("connection", (socket) => {
     console.log("A user disconnected");
   });
 
+  // Handle user logout
   socket.on("logout", (data) => {
     const { username } = data;
-    if (users[username]) {
-      delete users[username];
-      io.emit("updateUserList", Object.keys(users)); // Update the user list for everyone
-      console.log(`${username} logged out.`);
-    }
+
+    // Remove the user from the active users list
+    delete users[socket.id]; // Remove the user from the users object
+
+    // Emit the updated users list to all clients
+    io.emit("updateUserList", Object.values(users));
+
+    console.log(`${username} logged out.`);
   });
 });
 

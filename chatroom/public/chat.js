@@ -1,6 +1,19 @@
 const socket = io("http://192.168.29.13:3000");
 let loggedInUser = null;
 
+// Show Signup Form
+function showSignup() {
+    document.getElementById("loginContainer").classList.add("hidden");
+    document.getElementById("signupContainer").classList.remove("hidden");
+}
+
+// Show Login Form
+function showLogin() {
+    document.getElementById("signupContainer").classList.add("hidden");
+    document.getElementById("loginContainer").classList.remove("hidden");
+}
+
+// Login Function
 function login() {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -21,6 +34,28 @@ socket.on("loginSuccess", (message) => {
 
 socket.on("loginFailure", (message) => {
     document.getElementById("loginStatus").innerText = message;
+});
+
+// Signup Function
+function signup() {
+    const username = document.getElementById("signupUsername").value;
+    const password = document.getElementById("signupPassword").value;
+
+    if (username && password) {
+        socket.emit("signup", { username, password });
+    } else {
+        document.getElementById("signupStatus").innerText = "Please enter both username and password.";
+    }
+}
+
+socket.on("signupSuccess", (message) => {
+    document.getElementById("signupStatus").innerText = message;
+    alert(message); // This will display the success message in a dialog box
+    showLogin();  // Show the login form after successful signup
+});
+
+socket.on("signupFailure", (message) => {
+    document.getElementById("signupStatus").innerText = message;
 });
 
 socket.on("updateUserList", (users) => {
@@ -67,14 +102,27 @@ socket.on("privateChatError", (message) => {
     alert(message);
 });
 
+// Logout Function
 function logout() {
     if (loggedInUser) {
+        // Emit the logout event to the server
         socket.emit("logout", { username: loggedInUser });
+
+        // Reset the loggedInUser variable
         loggedInUser = null;
+
+        // Hide the chat container and show the login container
         document.getElementById("chatContainer").classList.add("hidden");
         document.getElementById("loginContainer").classList.remove("hidden");
+
+        // Clear the username and password fields
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
+
+        // Notify the user of the successful logout
         alert("You have been logged out.");
     }
 }
+
+
+
