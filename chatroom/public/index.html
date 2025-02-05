@@ -1,67 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chatroom</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
+  </head>
+
+  <body class="bg-gray-100">
     <!-- Login Screen -->
-    <div id="loginContainer" class="flex justify-center items-center h-screen bg-gray-50">
-        <div class="bg-white shadow-md rounded-lg p-8 max-w-sm w-full text-center">
-            <h3 class="text-xl font-semibold mb-4">Login</h3>
-            <input type="text" id="username" class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your username">
-            <input type="password" id="password" class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your password">
-            <button onclick="login()" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Login</button>
-            <p id="loginStatus" class="text-red-500 mt-3"></p>
-            <p class="text-sm mt-3">Don't have an account? <button onclick="showSignup()" class="text-blue-500">Sign Up</button></p>
-        </div>
+    <div
+      id="loginContainer"
+      class="flex justify-center items-center h-screen bg-gray-50"
+    >
+      <div
+        class="bg-white shadow-md rounded-lg p-8 max-w-sm w-full text-center"
+      >
+        <h3 class="text-xl font-semibold mb-4">Login</h3>
+        <input
+          type="text"
+          id="username"
+          class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Enter your username"
+        />
+        <input
+          type="password"
+          id="password"
+          class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Enter your password"
+        />
+        <button
+          onclick="login()"
+          class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+        >
+          Login
+        </button>
+        <p id="loginStatus" class="text-red-500 mt-3"></p>
+        <p class="text-sm mt-3">
+          Don't have an account?
+          <button onclick="showSignup()" class="text-blue-500">Sign Up</button>
+        </p>
+      </div>
     </div>
 
     <!-- Signup Screen -->
-    <div id="signupContainer" class="hidden flex justify-center items-center h-screen bg-gray-50">
-        <div class="bg-white shadow-md rounded-lg p-8 max-w-sm w-full text-center">
-            <h3 class="text-xl font-semibold mb-4">Sign Up</h3>
-            <input type="text" id="signupUsername" class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your username">
-            <input type="password" id="signupPassword" class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your password">
-            <button onclick="signup()" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Sign Up</button>
-            <p id="signupStatus" class="text-red-500 mt-3"></p>
-            <p class="text-sm mt-3">Already have an account? <button onclick="showLogin()" class="text-blue-500">Log In</button></p>
-        </div>
+    <div
+      id="signupContainer"
+      class="hidden flex justify-center items-center h-screen bg-gray-50"
+    >
+      <div
+        class="bg-white shadow-md rounded-lg p-8 max-w-sm w-full text-center"
+      >
+        <h3 class="text-xl font-semibold mb-4">Sign Up</h3>
+        <input
+          type="text"
+          id="signupUsername"
+          class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Enter your username"
+        />
+        <input
+          type="password"
+          id="signupPassword"
+          class="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Enter your password"
+        />
+        <button
+          onclick="signup()"
+          class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"
+        >
+          Sign Up
+        </button>
+        <p id="signupStatus" class="text-red-500 mt-3"></p>
+        <p class="text-sm mt-3">
+          Already have an account?
+          <button onclick="showLogin()" class="text-blue-500">Log In</button>
+        </p>
+      </div>
     </div>
 
     <!-- Chat Screen -->
     <div id="chatContainer" class="hidden h-screen flex flex-row">
-        <!-- Users Online -->
-        <div class="w-1/3 bg-white shadow-md border-r overflow-y-auto">
-            <h3 class="text-lg font-semibold bg-gray-200 p-4">Users Online:</h3>
-            <ul id="userList" class="p-4 space-y-2 text-gray-700"></ul>
+      <!-- Users Online -->
+      <div class="w-1/3 bg-white shadow-md border-r overflow-y-auto">
+        <h3 class="text-lg font-semibold bg-gray-200 p-4">Users Online:</h3>
+        <ul id="userList" class="p-4 space-y-2 text-gray-700"></ul>
+      </div>
+
+      <!-- Chat Area -->
+      <div class="w-2/3 flex flex-col bg-gray-50">
+        <div class="flex justify-between items-center bg-gray-200 p-4">
+          <h3 class="text-lg font-semibold">Group Chat</h3>
+          <button
+            onclick="logout()"
+            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          >
+            Logout
+          </button>
         </div>
 
-        <!-- Chat Area -->
-        <div class="w-2/3 flex flex-col bg-gray-50">
-            <div class="flex justify-between items-center bg-gray-200 p-4">
-                <h3 class="text-lg font-semibold">Group Chat</h3>
-                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">Logout</button>
-            </div>
+        <div
+          id="groupChat"
+          class="flex-grow overflow-y-auto bg-white shadow-inner border rounded-lg p-4 mb-4"
+        ></div>
 
-            <div id="groupChat" class="flex-grow overflow-y-auto bg-white shadow-inner border rounded-lg p-4 mb-4"></div>
-
-            <div class="flex gap-2 items-center px-4">
-                <textarea id="groupMessage" class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Type a message..."></textarea>
-                <button onclick="sendGroupMessage()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600">Send</button>
-            </div>
-
-            <!-- Private Chat -->
-            <div class="mt-4">
-                <h3 class="text-lg font-semibold bg-gray-200 p-4">Private Chat</h3>
-                <div id="privateChatBox" class="overflow-y-auto bg-white shadow-inner border rounded-lg p-4 h-64"></div>
-            </div>
+        <div class="flex gap-2 items-center px-4">
+          <textarea
+            id="groupMessage"
+            class="flex-grow p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Type a message..."
+          ></textarea>
+          <button
+            onclick="sendGroupMessage()"
+            class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+          >
+            Send
+          </button>
         </div>
+
+        <!-- Private Chat -->
+        <div class="mt-4">
+          <h3 class="text-lg font-semibold bg-gray-200 p-4">Private Chat</h3>
+          <div
+            id="privateChatBox"
+            class="overflow-y-auto bg-white shadow-inner border rounded-lg p-4 h-64"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div
+      id="logoutModal"
+      class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm">
+        <h3 class="text-lg font-semibold mb-4">Confirm Logout</h3>
+        <p class="text-gray-600 mb-4">Are you sure you want to log out?</p>
+        <div class="flex justify-center space-x-4">
+          <button
+            onclick="confirmLogout()"
+            class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+          >
+            Yes, Logout
+          </button>
+          <button
+            onclick="closeLogoutModal()"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="chat.js"></script>
-</body>
+  </body>
 </html>

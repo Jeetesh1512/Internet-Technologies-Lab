@@ -102,27 +102,35 @@ socket.on("privateChatError", (message) => {
     alert(message);
 });
 
-// Logout Function
+let logoutConfirmed = false;
+
 function logout() {
     if (loggedInUser) {
-        // Emit the logout event to the server
+        document.getElementById("logoutModal").classList.remove("hidden");
+    }
+}
+
+function closeLogoutModal() {
+    document.getElementById("logoutModal").classList.add("hidden");
+}
+
+function confirmLogout() {
+    if (loggedInUser) {
         socket.emit("logout", { username: loggedInUser });
 
-        // Reset the loggedInUser variable
         loggedInUser = null;
 
-        // Hide the chat container and show the login container
         document.getElementById("chatContainer").classList.add("hidden");
         document.getElementById("loginContainer").classList.remove("hidden");
 
-        // Clear the username and password fields
         document.getElementById("username").value = "";
         document.getElementById("password").value = "";
 
-        // Notify the user of the successful logout
-        alert("You have been logged out.");
+        closeLogoutModal();
     }
 }
+
+
 
 
 

@@ -1,27 +1,45 @@
 from flask import Flask, jsonify, request
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
+SECRET_KEY = b"vNnP7B82XbJfXeVh_w0Pb9bZj5ZHRwxD3IR3iORlxUQ=" 
+cipher = Fernet(SECRET_KEY)
+
+# Database Configuration
 db_config = {
     "host": "localhost",
-    "user": "root",  
-    "password": "abj1512@h", 
+    "user": "root",
+    "password": "abj1512@h",
     "database": "user_auth"
 }
 
+# Establish connection
 conn = mysql.connector.connect(**db_config)
 cursor = conn.cursor()
 
+# Create users table if not exists
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        username VARCHAR(255) UNIQUE NOT NULL,
+        username_encrypted TEXT NOT NULL,
         password_hash VARCHAR(255) NOT NULL
     )
 """)
 conn.commit()
+
+
+# Encrypt Username
+def encrypt_username(username):
+    return cipher.encrypt(username.encode()).decode()
+
+
+# Decrypt Username
+def decrypt_username(encrypted_username):
+    return cipher.decrypt(encrypted_username.encode()).decode()
+
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -33,12 +51,19 @@ def signup():
         return jsonify({"status": "failure", "message": "Username and password required"}), 400
 
     try:
-        password_hash = generate_password_hash(password)
-        cursor.execute("INSERT INTO users (username, password_hash) VALUES (%s, %s)", (username, password_hash))
+        encrypted_username = encrypt_username(username)  # Encrypt the username
+        password_hash = generate_password_hash(password)  # Hash the password
+
+        cursor.execute(
+            "INSERT INTO users (username_encrypted, password_hash) VALUES (%s, %s)",
+            (encrypted_username, password_hash),
+        )
         conn.commit()
         return jsonify({"status": "success", "message": "User registered successfully"}), 201
+
     except mysql.connector.IntegrityError:
         return jsonify({"status": "failure", "message": "Username already exists"}), 409
+
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -46,12 +71,17 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
-    cursor.execute("SELECT password_hash FROM users WHERE username = %s", (username,))
-    result = cursor.fetchone()
+    cursor.execute("SELECT username_encrypted, password_hash FROM users")
+    users = cursor.fetchall()
 
-    if result and check_password_hash(result[0], password):
-        return jsonify({"status": "success", "message": "Login successful"}), 200
+    for encrypted_username, password_hash in users:
+        decrypted_username = decrypt_username(encrypted_username)
+
+        if decrypted_username == username and check_password_hash(password_hash, password):
+            return jsonify({"status": "success", "message": "Login successful"}), 200
+
     return jsonify({"status": "failure", "message": "Invalid credentials"}), 401
 
+
 if __name__ == "__main__":
-    app.run(port=5000)
+    app.run(port=5000, debug=True)
