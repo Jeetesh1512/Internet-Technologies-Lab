@@ -2,18 +2,21 @@ from flask import Flask, jsonify, request
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+import os
+
+load_dotenv() 
 
 app = Flask(__name__)
 
-SECRET_KEY = b"vNnP7B82XbJfXeVh_w0Pb9bZj5ZHRwxD3IR3iORlxUQ=" 
+SECRET_KEY = os.getenv('SECRET_KEY').encode()
 cipher = Fernet(SECRET_KEY)
 
-# Database Configuration
 db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "abj1512@h",
-    "database": "user_auth"
+    "host": os.getenv('DB_HOST'),
+    "user": os.getenv('DB_USER'),
+    "password": os.getenv('DB_PASSWORD'),
+    "database": os.getenv('DB_NAME')
 }
 
 # Establish connection
@@ -30,16 +33,13 @@ cursor.execute("""
 """)
 conn.commit()
 
-
 # Encrypt Username
 def encrypt_username(username):
     return cipher.encrypt(username.encode()).decode()
 
-
 # Decrypt Username
 def decrypt_username(encrypted_username):
     return cipher.decrypt(encrypted_username.encode()).decode()
-
 
 @app.route("/signup", methods=["POST"])
 def signup():
@@ -64,7 +64,6 @@ def signup():
     except mysql.connector.IntegrityError:
         return jsonify({"status": "failure", "message": "Username already exists"}), 409
 
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
@@ -81,7 +80,6 @@ def login():
             return jsonify({"status": "success", "message": "Login successful"}), 200
 
     return jsonify({"status": "failure", "message": "Invalid credentials"}), 401
-
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
