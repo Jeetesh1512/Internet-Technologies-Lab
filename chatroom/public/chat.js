@@ -1,5 +1,4 @@
-//const socket = io("http://192.168.29.13:3000");
-const socket = io("http://172.24.48.190:3000");
+const socket = io("http://192.168.29.13:3000");
 let loggedInUser = null;
 
 // Show Signup Form

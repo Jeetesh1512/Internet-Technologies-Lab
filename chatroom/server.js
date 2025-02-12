@@ -174,5 +174,5 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Start the server
 const PORT = 3000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://172.24.48.190:${PORT}`);
+  console.log(`Server is running on http://192.168.29.13:${PORT}`);
 });
