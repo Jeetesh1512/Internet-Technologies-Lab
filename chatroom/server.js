@@ -1,3 +1,6 @@
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -138,8 +141,38 @@ io.on("connection", (socket) => {
   });
 });
 
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// Configure multer storage
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    io.emit('fileMessage', { fileUrl, fileName: req.file.originalname });
+    res.json({ fileUrl, fileName: req.file.originalname });
+});
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Start the server
 const PORT = 3000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on http://192.168.29.13:${PORT}`);
+  console.log(`Server is running on http://172.24.48.190:${PORT}`);
 });

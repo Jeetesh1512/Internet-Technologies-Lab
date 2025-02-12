@@ -1,4 +1,5 @@
-const socket = io("http://192.168.29.13:3000");
+//const socket = io("http://192.168.29.13:3000");
+const socket = io("http://172.24.48.190:3000");
 let loggedInUser = null;
 
 // Show Signup Form
@@ -128,6 +129,45 @@ function confirmLogout() {
 
         closeLogoutModal();
     }
+}
+
+
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.fileUrl) {
+            appendFileMessage(data.fileUrl, data.fileName);
+        }
+    })
+    .catch(error => console.error('Error uploading file:', error));
+}
+
+socket.on('fileMessage', (data) => {
+    appendFileMessage(data.fileUrl, data.fileName);
+});
+
+function appendFileMessage(fileUrl, fileName) {
+    const chatBox = document.getElementById('groupChat');
+    const fileLink = document.createElement('a');
+    fileLink.href = fileUrl;
+    fileLink.textContent = `📎 ${fileName}`;
+    fileLink.target = '_blank';
+    fileLink.classList.add('text-blue-500', 'underline', 'block', 'mt-2');
+
+    chatBox.appendChild(fileLink);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 
